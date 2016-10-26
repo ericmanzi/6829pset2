@@ -5,7 +5,7 @@
 
 using namespace std;
 
-float cwnd = 12;
+float cwnd = 120;
 unsigned int last_sequence_number_sent = 0;
 
 /* Default constructor */
