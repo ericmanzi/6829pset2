@@ -13,7 +13,8 @@ unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
 uint64_t min_rtt = (uint64_t) UINT_MAX;
-unsigned int threshold_factor = 3;
+unsigned int ceil_threshold_factor = 2;
+unsigned int floor_threshold_factor = 1.3;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
@@ -77,13 +78,17 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
 
   if (num_acks_til_next_md < 1) {
-    if ( rtt > threshold_factor * min_rtt ) {
+    if ( rtt > ceil_threshold_factor * min_rtt ) {
       cerr << "************* DROP ********** " << "RTT: " << rtt << ", minRTT: " << min_rtt << endl;
       num_acks_til_next_md = window_size();
       cwnd = cwnd/drop_factor;
     } else {
       cwnd++;
     }
+  }
+  if ( rtt < floor_threshold_factor * min_rtt ) {
+    cerr << "************* Close to min ********** " << "RTT: " << rtt << endl;
+    cwnd++;
   }
 
 //  if ( rtt > threshold_factor * min_rtt ) {
