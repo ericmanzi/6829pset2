@@ -21,10 +21,10 @@ unsigned int Controller::window_size( void )
   /* Default: fixed window size of 100 outstanding datagrams */
   unsigned int the_window_size = (unsigned int) cwnd;
 
-  if ( debug_ ) {
+//  if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
 	 << " window size is " << the_window_size << endl;
-  }
+//  }
 
   return the_window_size;
 }
