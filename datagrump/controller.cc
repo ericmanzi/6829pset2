@@ -69,7 +69,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
   /* Check if timeout exceeded */
-  uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
+//  uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
 
 //  cerr << "Seqnum acked: " << sequence_number_acked <<", last acked: " << last_sequence_number_acked << endl;
 //  if ((unsigned int) rtt > timeout_ms() ) {
