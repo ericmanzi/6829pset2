@@ -5,7 +5,7 @@
 
 using namespace std;
 
-float window_size = 1;
+float cwnd = 1;
 float factor = 2;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
@@ -20,7 +20,7 @@ Controller::Controller( const bool debug )
 unsigned int Controller::window_size( void )
 {
   /* Default: fixed window size of 100 outstanding datagrams */
-  unsigned int the_window_size = (unsigned int) window_size;
+  unsigned int the_window_size = (unsigned int) cwnd;
 
 //  if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
@@ -72,12 +72,12 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if ((unsigned int) rtt > timeout_ms() ) {
     cerr << "Timeout exceeded: " << rtt << endl;
     if (num_acks_since_last_md > window_size()) {
-      window_size = window_size/factor;
+      cwnd = cwnd/factor;
       cerr << "acks since last md:" << num_acks_since_last_md << endl;
       num_acks_since_last_md = 0;
     }
   } else {
-    window_size += 1;
+    cwnd += 1;
   }
 
 
