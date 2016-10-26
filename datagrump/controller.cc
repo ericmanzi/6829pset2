@@ -77,7 +77,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       num_acks_since_last_md = 0;
     }
   } else {
-    window_size ++;
+    window_size += 1;
   }
 
 
