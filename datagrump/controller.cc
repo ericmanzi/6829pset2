@@ -78,9 +78,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       cerr << "acks since last md:" << num_acks_since_last_md << endl;
       num_acks_since_last_md = 0;
     }
-  } else {
-    cwnd += 1;
   }
+  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
 
 
 // if Duplicate
