@@ -79,7 +79,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   if (num_acks_til_next_md < 1) {
     if ( rtt > ceil_threshold_factor * min_rtt ) {
-      cerr << "************* DROP ********** " << "RTT: " << rtt << ", minRTT: " << min_rtt << endl;
+//      cerr << "************* DROP ********** " << "RTT: " << rtt << ", minRTT: " << min_rtt << endl;
       num_acks_til_next_md = window_size();
       cwnd = cwnd/drop_factor;
     } else {
@@ -87,7 +87,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     }
   }
   if ( rtt < floor_threshold_factor * min_rtt ) {
-    cerr << "************* Close to min ********** " << "RTT: " << rtt << endl;
+//    cerr << "************* Close to min ********** " << "RTT: " << rtt << endl;
     cwnd++;
   }
 
