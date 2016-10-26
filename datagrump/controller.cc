@@ -6,11 +6,13 @@
 using namespace std;
 
 float cwnd = 1;
-float factor = 2;
+float drop_factor = 2;
 unsigned int max_wnd = 22;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
+uint64_t min_rtt = numeric_limits<uint64_t>::max();
+unsigned int threshold_factor = 2;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
@@ -71,24 +73,31 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   /* Check if timeout exceeded */
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
 
-//  cerr << "Seqnum acked: " << sequence_number_acked <<", last acked: " << last_sequence_number_acked << endl;
-  if ((unsigned int) rtt > timeout_ms() ) {
-//  if (sequence_number_acked - last_sequence_number_acked > 1 ) {
-//    cerr << "!!!Drop. Seqnum acked: " << sequence_number_acked <<", last acked: " << last_sequence_number_acked << endl;
-      cerr << "acks til next md:" << num_acks_til_next_md << endl;
-    if (num_acks_til_next_md < 1) {
-      cwnd = cwnd/factor;
+  min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
+
+  if (num_acks_til_next_md < 1) {
+    if ( rtt > threshold_factor * min_rtt ) {
+      cerr << "************* DROP ********** " << "RTT: " << rtt << ", minRTT: " << min_rtt << endl;
       num_acks_til_next_md = window_size();
+      cwnd = cwnd/drop_factor;
+    } else {
+      cwnd++;
     }
   }
-//  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
-  cwnd++;
 
-// if Duplicate
-//  if (last_sequence_number_acked == sequence_number_acked) {
-//    cerr << "found duplicate ack: " << sequence_number_acked << endl;
+//  if ( rtt > threshold_factor * min_rtt ) {
+//  if (sequence_number_acked - last_sequence_number_acked > 1 ) {
+//    cerr << "!!!Drop. Seqnum acked: " << sequence_number_acked <<", last acked: " << last_sequence_number_acked << endl;
+//    cerr << "acks til next md:" << num_acks_til_next_md << endl;
+//    if (num_acks_til_next_md < 1) {
+//      num_acks_til_next_md = window_size();
+//      cwnd = cwnd/drop_factor;
+//    }
 //  }
-      cerr << "acks til next md:" << num_acks_til_next_md << endl;
+//  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
+//  cwnd++;
+
+  cerr << "acks til next md:" << num_acks_til_next_md << endl;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
