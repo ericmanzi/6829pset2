@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits.h>
 
 #include "controller.hh"
 #include "timestamp.hh"
@@ -11,7 +12,7 @@ unsigned int max_wnd = 22;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
-uint64_t min_rtt = numeric_limits<uint64_t>::max();
+uint64_t min_rtt = (uint64_t) UINT_MAX;
 unsigned int threshold_factor = 2;
 
 /* Default constructor */
