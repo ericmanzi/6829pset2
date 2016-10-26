@@ -5,23 +5,26 @@
 
 using namespace std;
 
+float cwnd = 12;
+
 /* Default constructor */
 Controller::Controller( const bool debug )
-  : debug_( debug )
+//  : debug_( debug )
+  : debug_( 1 )
 {}
 
 /* Get current window size, in datagrams */
 unsigned int Controller::window_size( void )
 {
   /* Default: fixed window size of 100 outstanding datagrams */
-  unsigned int the_window_size = 13;
+//  unsigned int the_window_size = 13;
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
 	 << " window size is " << the_window_size << endl;
   }
 
-  return the_window_size;
+  return (unsigned int) cwnd;
 }
 
 /* A datagram was sent */
@@ -57,6 +60,10 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 	 << ", received @ time " << recv_timestamp_acked << " by receiver's clock)"
 	 << endl;
   }
+
+  /* Check if packet was dropped */
+
+
 }
 
 /* How long to wait (in milliseconds) if there are no acks
