@@ -10,7 +10,7 @@ float cwnd = 12;
 /* Default constructor */
 Controller::Controller( const bool debug )
 //  : debug_( debug )
-  : debug_( 1 )
+  : debug2_( debug ), debug_( 1 )
 {}
 
 /* Get current window size, in datagrams */
