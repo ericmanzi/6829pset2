@@ -68,6 +68,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   /* Check if packet was dropped */
 
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
+  cerr << "RTT: " << rtt << endl;
 
 // if Duplicate
 //  if (last_sequence_number_acked == sequence_number_acked) {
