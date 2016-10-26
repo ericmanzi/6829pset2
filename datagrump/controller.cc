@@ -62,7 +62,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 	 << ", received @ time " << recv_timestamp_acked << " by receiver's clock)"
 	 << endl;
   }
-  cerr << " last datagram sent was " << last_sequence_number_sent
+  cerr << " last datagram sent was " << last_sequence_number_sent;
   /* Check if packet was dropped */
 
 
