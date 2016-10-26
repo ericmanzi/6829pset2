@@ -5,8 +5,9 @@
 
 using namespace std;
 
-float cwnd = 1;
+float cwnd = 1000;
 float factor = 2;
+unsigned int max_wnd = 80;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_since_last_md = 0;
@@ -72,12 +73,13 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if ((unsigned int) rtt > timeout_ms() ) {
     cerr << "Timeout exceeded: " << rtt << endl;
     if (num_acks_since_last_md > window_size()) {
-      cwnd = cwnd/factor;
-      cerr << "acks since last md:" << num_acks_since_last_md << endl;
-      num_acks_since_last_md = 0;
+//      cwnd = cwnd/factor;
+//      cerr << "acks since last md:" << num_acks_since_last_md << endl;
+//      num_acks_since_last_md = 0;
     }
   } else {
-    cwnd += 1;
+    cerr << "within timeout: " << rtt << endl;
+//    cwnd += 1;
   }
 
 
