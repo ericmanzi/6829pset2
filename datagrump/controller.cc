@@ -71,10 +71,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   /* Check if timeout exceeded */
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
-  if (rtt < min_rtt) {
-    min_rtt = rtt;
-    cerr << "MIN RTT:" << min_rtt << endl;
-  }
+  cerr << "RTT: " << rtt << endl;
 
   if ((unsigned int) rtt > timeout_ms() ) {
 //    cerr << "Timeout exceeded: " << rtt << " for received ack: " << sequence_number_acked << endl;
