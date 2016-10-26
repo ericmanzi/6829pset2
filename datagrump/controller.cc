@@ -5,13 +5,13 @@
 
 using namespace std;
 
-float cwnd = 120;
+float cwnd = 320;
 unsigned int last_sequence_number_sent = 0;
+unsigned int last_sequence_number_acked = 0;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
-//  : debug_( debug )
-  : debug2_( debug ), debug_( 1 )
+  : debug_( debug )
 {}
 
 /* Get current window size, in datagrams */
@@ -40,6 +40,7 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
     cerr << "At time " << send_timestamp
 	 << " sent datagram " << sequence_number << endl;
   }
+
   last_sequence_number_sent = sequence_number;
 }
 
@@ -63,9 +64,14 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 	 << endl;
   }
   cerr << " last datagram sent was " << last_sequence_number_sent;
+
+
   /* Check if packet was dropped */
-
-
+// if Duplicate
+  if (last_sequence_number_acked == sequence_number_acked) {
+    cerr << "found duplicate: " << sequence_number_acked;
+  }
+  last_sequence_number_acked = sequence_number_acked;
 }
 
 /* How long to wait (in milliseconds) if there are no acks
