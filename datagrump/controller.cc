@@ -10,7 +10,7 @@ float factor = 2;
 unsigned int max_wnd = 22;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
-unsigned int num_acks_since_last_md = 0;
+unsigned int num_acks_since_last_md = 1000000;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
@@ -76,9 +76,9 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //  if (sequence_number_acked - last_sequence_number_acked > 1 ) {
 //    cerr << "!!!Drop. Seqnum acked: " << sequence_number_acked <<", last acked: " << last_sequence_number_acked << endl;
       cerr << "acks since last md:" << num_acks_since_last_md << endl;
-    if (num_acks_since_last_md > window_size()) {
+    if (num_acks_since_last_md < 1) {
       cwnd = cwnd/factor;
-      num_acks_since_last_md = 0;
+      num_acks_since_last_md = window_size();
     }
   }
 //  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
@@ -89,7 +89,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //    cerr << "found duplicate ack: " << sequence_number_acked << endl;
 //  }
 
-  num_acks_since_last_md++;
+  num_acks_since_last_md--;
   last_sequence_number_acked = sequence_number_acked;
 }
 
