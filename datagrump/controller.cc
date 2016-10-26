@@ -27,10 +27,10 @@ unsigned int Controller::window_size( void )
   /* Default: fixed window size of 100 outstanding datagrams */
   unsigned int the_window_size = (unsigned int) cwnd;
 
-//  if ( debug_ ) {
+  if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
 	 << " window size is " << the_window_size << endl;
-//  }
+  }
 
   return the_window_size;
 }
@@ -63,13 +63,13 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 {
   /* Default: take no action */
 
-//  if ( debug_ ) {
+  if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
 	 << " received ack for datagram " << sequence_number_acked
 	 << " (send @ time " << send_timestamp_acked
 	 << ", received @ time " << recv_timestamp_acked << " by receiver's clock)"
 	 << endl;
-//  }
+  }
 
 
   /* Check if timeout exceeded */
@@ -103,7 +103,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
 //  cwnd++;
 
-  cerr << "acks til next md:" << num_acks_til_next_md << endl;
+//  cerr << "acks til next md:" << num_acks_til_next_md << endl;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
