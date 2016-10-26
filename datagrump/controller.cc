@@ -79,8 +79,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       num_acks_since_last_md = 0;
     }
   }
-  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
-
+//  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
+  cwnd++;
 
 // if Duplicate
 //  if (last_sequence_number_acked == sequence_number_acked) {
