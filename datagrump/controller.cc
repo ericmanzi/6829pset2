@@ -7,6 +7,7 @@ using namespace std;
 
 float cwnd = 5;
 float factor = 2;
+uint64_t min_rtt = 0;
 unsigned int max_wnd = 80;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
@@ -23,10 +24,10 @@ unsigned int Controller::window_size( void )
   /* Default: fixed window size of 100 outstanding datagrams */
   unsigned int the_window_size = (unsigned int) cwnd;
 
-//  if ( debug_ ) {
+  if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
 	 << " window size is " << the_window_size << endl;
-//  }
+  }
 
   return the_window_size;
 }
@@ -70,15 +71,20 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   /* Check if timeout exceeded */
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
+  if (rtt < min_rtt) {
+    min_rtt = rtt;
+    cerr << "MIN RTT:" << min_rtt << endl;
+  }
+
   if ((unsigned int) rtt > timeout_ms() ) {
-    cerr << "Timeout exceeded: " << rtt << " for received ack: " << sequence_number_acked << endl;
+//    cerr << "Timeout exceeded: " << rtt << " for received ack: " << sequence_number_acked << endl;
     if (num_acks_since_last_md > window_size()) {
 //      cwnd = cwnd/factor;
 //      cerr << "acks since last md:" << num_acks_since_last_md << endl;
 //      num_acks_since_last_md = 0;
     }
   } else {
-    cerr << "within timeout: " << rtt << " for received ack: " << sequence_number_acked << endl;
+//    cerr << "within timeout: " << rtt << " for received ack: " << sequence_number_acked << endl;
 //    cwnd += 1;
   }
 
