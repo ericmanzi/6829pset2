@@ -6,6 +6,7 @@
 using namespace std;
 
 float cwnd = 320;
+float factor = 2;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 
@@ -69,6 +70,9 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   if ((unsigned int) rtt > timeout_ms()) {
     cerr << "Timeout exceeded: " << rtt << endl;
+    cwnd = cwnd/factor;
+  } else {
+    cwnd += 1/cwnd;
   }
 
 
