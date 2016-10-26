@@ -13,7 +13,7 @@ unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
 uint64_t min_rtt = (uint64_t) UINT_MAX;
-unsigned int threshold_factor = 2;
+unsigned int threshold_factor = 3;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
