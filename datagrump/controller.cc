@@ -6,6 +6,7 @@
 using namespace std;
 
 float cwnd = 12;
+unsigned int last_sequence_number_sent = 0;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
@@ -39,6 +40,7 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
     cerr << "At time " << send_timestamp
 	 << " sent datagram " << sequence_number << endl;
   }
+  last_sequence_number_sent = sequence_number;
 }
 
 /* An ack was received */
@@ -60,7 +62,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 	 << ", received @ time " << recv_timestamp_acked << " by receiver's clock)"
 	 << endl;
   }
-
+  cerr << " last datagram sent was " << last_sequence_number_sent
   /* Check if packet was dropped */
 
 
