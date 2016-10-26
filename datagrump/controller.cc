@@ -75,7 +75,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if ((unsigned int) rtt > timeout_ms() ) {
 //  if (sequence_number_acked - last_sequence_number_acked > 1 ) {
 //    cerr << "!!!Drop. Seqnum acked: " << sequence_number_acked <<", last acked: " << last_sequence_number_acked << endl;
-      cerr << "acks since last md:" << num_acks_since_last_md << endl;
+      cerr << "acks since last md:" << num_acks_til_next_md << endl;
     if (num_acks_til_next_md < 1) {
       cwnd = cwnd/factor;
       num_acks_til_next_md = window_size();
