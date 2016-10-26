@@ -89,7 +89,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //    cerr << "found duplicate ack: " << sequence_number_acked << endl;
 //  }
 
-  if (num_acks_since_last_md > 1) num_acks_since_last_md--;
+  if (num_acks_til_next_md > 1) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
 }
 
