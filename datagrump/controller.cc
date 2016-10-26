@@ -14,7 +14,7 @@ Controller::Controller( const bool debug )
 unsigned int Controller::window_size( void )
 {
   /* Default: fixed window size of 100 outstanding datagrams */
-  unsigned int the_window_size = 4;
+  unsigned int the_window_size = 1;
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
