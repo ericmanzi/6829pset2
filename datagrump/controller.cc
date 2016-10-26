@@ -7,7 +7,7 @@ using namespace std;
 
 float cwnd = 5;
 float factor = 2;
-uint64_t min_rtt = 0;
+uint64_t min_rtt = UINT_MAX;
 unsigned int max_wnd = 80;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
