@@ -28,11 +28,11 @@ unsigned int Controller::window_size( void )
   /* Default: fixed window size of 100 outstanding datagrams */
   unsigned int the_window_size = (unsigned int) cwnd;
 
-  if ( debug_ ) {
+//  if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
 	 << " window size is " << the_window_size << endl;
-  }
-
+//  }
+cerr << "cwnd " << cwnd << endl;
   return the_window_size;
 }
 
@@ -78,7 +78,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   // Wait for buffer to clear the last window before decreasing the window size
   if (num_acks_til_next_md < 1) {
     if ( rtt > timeout_ms() ) {  /* Check if timeout exceeded */
-      num_acks_til_next_md = (unsigned int) 2.0 *window_size();
+      num_acks_til_next_md = (unsigned int) 1.5 * window_size();
       cwnd = cwnd/md_factor;
     } else {
       cwnd+=ai/cwnd;
