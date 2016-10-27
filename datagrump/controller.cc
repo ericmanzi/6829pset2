@@ -78,7 +78,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   // Wait for buffer to clear the last window before decreasing the window size
   if (num_acks_til_next_md < 1) {
     if ( rtt > timeout_ms() ) {  /* Check if timeout exceeded */
-      num_acks_til_next_md = (unsigned int) 1.9*window_size();
+      num_acks_til_next_md = (unsigned int) 2.0 *window_size();
       cwnd = cwnd/md_factor;
     } else {
       cwnd+=ai;
