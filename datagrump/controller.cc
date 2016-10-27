@@ -94,5 +94,5 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 unsigned int Controller::timeout_ms( void )
 {
 //  return (unsigned int) min_rtt * 2;
-  return 500;
+  return 100;
 }
