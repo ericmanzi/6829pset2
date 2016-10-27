@@ -82,7 +82,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       ai = ai_init;
     }
   }
-  ai *= 2;
+  ai *= 1.01;
   if ( rtt < floor_threshold_factor * min_rtt ) {
     cwnd+=ai;
   } else {
