@@ -80,7 +80,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
   /* check if timeout exceeded for packets that have not yet been acked */
-  for ( unsigned int i = (int)last_sequence_number_acked; i < (int)last_sequence_number_sent; i++ ) {
+  for ( uint64_t i = last_sequence_number_acked; i < last_sequence_number_sent; i++ ) {
       uint64_t delay_so_far = timestamp_ack_received - sent_table[i];
       if (delay_so_far > ceil_threshold_factor * min_rtt) {
         cerr << "*** At time " << timestamp_ack_received << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table << endl;
