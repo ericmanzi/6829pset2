@@ -10,6 +10,7 @@ float cwnd = 1;
 float ai_init = 1;
 float ai = ai_init;
 float md_factor = 2;
+uint64_t sent_table[50000];
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
@@ -48,6 +49,7 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 	 << " sent datagram " << sequence_number << endl;
   }
 
+  sent_table[(unsigned int) sequence_number] = send_timestamp;
   last_sequence_number_sent = sequence_number;
 }
 
@@ -63,13 +65,13 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 {
   /* Default: take no action */
 
-//  if ( debug_ ) {
+  if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
 	 << " received ack for datagram " << sequence_number_acked
 	 << " (send @ time " << send_timestamp_acked
 	 << ", received @ time " << recv_timestamp_acked << " by receiver's clock)"
 	 << endl;
-//  }
+  }
 
 
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
