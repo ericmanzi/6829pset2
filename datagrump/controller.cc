@@ -6,7 +6,7 @@
 
 using namespace std;
 
-float cwnd = 12;
+float cwnd = 6;
 float ai = 2;
 float md_factor = 2;
 unsigned int last_sequence_number_sent = 0;
