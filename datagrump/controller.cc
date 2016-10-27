@@ -81,7 +81,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     }
   }
   if ( rtt < floor_threshold_factor * min_rtt ) {
-    cwnd+=(ai*2)/cwnd;
+    cwnd+=2;
   }
   cwnd+=ai/cwnd;
 
