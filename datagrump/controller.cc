@@ -86,18 +86,22 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
         cerr << "************" << endl;
         cerr << "At time " << timestamp_ms() << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table[i] << ", current rtt: " << rtt << ", last acked:" << last_sequence_number_acked << endl;
         cerr << "************" << endl;
+
+        // Wait for buffer to clear the last window before decreasing the window size
+        if (num_acks_til_next_md < 1) {
+//          if ( rtt > ceil_threshold_factor * min_rtt ) {
+            num_acks_til_next_md = (unsigned int) 1.5 * window_size();
+            cwnd = cwnd/md_factor;
+            ai = ai_init;
+            break;
+//          }
+        }
+
       }
   }
 
 
-  // Wait for buffer to clear the last window before decreasing the window size
-  if (num_acks_til_next_md < 1) {
-    if ( rtt > ceil_threshold_factor * min_rtt ) {
-      num_acks_til_next_md = (unsigned int) 1.5 * window_size();
-      cwnd = cwnd/md_factor;
-      ai = ai_init;
-    }
-  }
+
   ai *= 1.005;
   if ( rtt < floor_threshold_factor * min_rtt ) {
     cwnd+=ai;
