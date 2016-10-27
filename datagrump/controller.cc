@@ -14,7 +14,7 @@ uint64_t sent_table[50000];
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
-uint64_t min_rtt = (uint64_t) UINT_MAX;
+uint64_t min_rtt = (uint64_t) UINT_MAX/100;
 unsigned int ceil_threshold_factor = 2.4;
 unsigned int floor_threshold_factor = 1.1;
 
@@ -80,11 +80,11 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
   /* check if timeout exceeded for packets that have not yet been acked */
-  for ( uint64_t i = last_sequence_number_acked+1; i < last_sequence_number_sent - 1; i++ ) {
-      uint64_t delay_so_far = timestamp_ack_received - sent_table[i];
+  for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
+      uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > ceil_threshold_factor * min_rtt) {
         cerr << "************" << endl;
-        cerr << "At time " << timestamp_ack_received << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table[i] << ", current rtt: " << rtt << ", last acked:" << last_sequence_number_acked << endl;
+        cerr << "At time " << timestamp_ms() << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table[i] << ", current rtt: " << rtt << ", last acked:" << last_sequence_number_acked << endl;
         cerr << "************" << endl;
       }
   }
