@@ -7,7 +7,7 @@
 using namespace std;
 
 double cwnd = 1;
-double ai = 2;
+double ai = 1;
 double md_factor = 2;
 unsigned int max_wnd = 22;
 unsigned int last_sequence_number_sent = 0;
