@@ -78,26 +78,26 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
 
+  if (num_acks_til_next_md < 1) {
 
-  /* check if timeout exceeded for packets that have not yet been acked */
-  for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
+    /* check if timeout exceeded for packets that have not yet been acked */
+    for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > ceil_threshold_factor * min_rtt) {
-//        cerr << "************" << endl;
-//        cerr << "At time " << timestamp_ms() << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table[i] << ", current rtt: " << rtt << ", last acked:" << last_sequence_number_acked << endl;
-//        cerr << "************" << endl;
+  //        cerr << "************" << endl;
+  //        cerr << "At time " << timestamp_ms() << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table[i] << ", current rtt: " << rtt << ", last acked:" << last_sequence_number_acked << endl;
+  //        cerr << "************" << endl;
 
-        // Wait for buffer to clear the last window before decreasing the window size
-        if (num_acks_til_next_md < 1) {
-//          if ( rtt > ceil_threshold_factor * min_rtt ) {
-            num_acks_til_next_md = (unsigned int) 1.5 * window_size();
-            cwnd = cwnd/md_factor;
-            ai = ai_init;
-            break;
-//          }
+          // Wait for buffer to clear the last window before decreasing the window size
+  //          if ( rtt > ceil_threshold_factor * min_rtt ) {
+          num_acks_til_next_md = (unsigned int) 1.5 * window_size();
+          cwnd = cwnd/md_factor;
+          ai = ai_init;
+          break;
+  //          }
+
         }
-
-      }
+     }
   }
 
 
