@@ -7,8 +7,8 @@
 using namespace std;
 
 float cwnd = 1;
-float drop_factor = 2;
-unsigned int max_wnd = 22;
+float ai = 2;
+float md_factor = 2;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
@@ -31,7 +31,6 @@ unsigned int Controller::window_size( void )
     cerr << "At time " << timestamp_ms()
 	 << " window size is " << the_window_size << endl;
   }
-
   return the_window_size;
 }
 
@@ -72,38 +71,20 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   }
 
 
-  /* Check if timeout exceeded */
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
-
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
-
+  // Wait for buffer to clear the last window before decreasing the window size
   if (num_acks_til_next_md < 1) {
     if ( rtt > ceil_threshold_factor * min_rtt ) {
-//      cerr << "************* DROP ********** " << "RTT: " << rtt << ", minRTT: " << min_rtt << endl;
-      num_acks_til_next_md = window_size();
-      cwnd = cwnd/drop_factor;
-    } else {
-      cwnd++;
+      num_acks_til_next_md = (unsigned int) 1.5 * window_size();
+      cwnd = cwnd/md_factor;
     }
   }
   if ( rtt < floor_threshold_factor * min_rtt ) {
-//    cerr << "************* Close to min ********** " << "RTT: " << rtt << endl;
-    cwnd++;
+    cwnd+=ai;
+  } else {
+    cwnd+=ai/cwnd;
   }
-
-//  if ( rtt > threshold_factor * min_rtt ) {
-//  if (sequence_number_acked - last_sequence_number_acked > 1 ) {
-//    cerr << "!!!Drop. Seqnum acked: " << sequence_number_acked <<", last acked: " << last_sequence_number_acked << endl;
-//    cerr << "acks til next md:" << num_acks_til_next_md << endl;
-//    if (num_acks_til_next_md < 1) {
-//      num_acks_til_next_md = window_size();
-//      cwnd = cwnd/drop_factor;
-//    }
-//  }
-//  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
-//  cwnd++;
-
-//  cerr << "acks til next md:" << num_acks_til_next_md << endl;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
@@ -113,5 +94,6 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
    before sending one more datagram */
 unsigned int Controller::timeout_ms( void )
 {
-  return 1000; /* timeout of one second */
+  return (unsigned int) ceil_threshold_factor * min_rtt;
+//  return 110;
 }
