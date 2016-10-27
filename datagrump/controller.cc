@@ -80,7 +80,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
   float target_rtt = (ceil_threshold_factor * min_rtt);
 
-//  if (num_acks_til_next_md < 1) {
+  if (num_acks_til_next_md < 1) {
 
     /* check if timeout exceeded for packets that have not yet been acked */
     for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
@@ -97,14 +97,14 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
           cwnd = cwnd/md_factor;
 
           ai = ai_init;
-          num_acks_til_next_md = (unsigned int) 1.5 * window_size();
-//          num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+//          num_acks_til_next_md = (unsigned int) 1.5 * window_size();
+          num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
           break;
   //          }
 
         }
      }
-//  }
+  }
 
 
 
