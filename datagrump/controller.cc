@@ -83,7 +83,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   for ( uint64_t i = last_sequence_number_acked; i < last_sequence_number_sent; i++ ) {
       uint64_t delay_so_far = timestamp_ack_received - sent_table[i];
       if (delay_so_far > ceil_threshold_factor * min_rtt) {
-        cerr << "*** At time " << timestamp_ack_received << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table[i] << endl;
+        cerr << "*** At time " << timestamp_ack_received << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table[i] << ", current rtt: " << rtt << endl;
       }
   }
 
