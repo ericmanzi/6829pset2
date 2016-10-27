@@ -7,7 +7,8 @@
 using namespace std;
 
 float cwnd = 1;
-float drop_factor = 2;
+float ai = 1;
+float md_factor = 2;
 unsigned int max_wnd = 22;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
@@ -72,38 +73,16 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   }
 
 
-  /* Check if timeout exceeded */
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
-
-  min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
-
+  // Wait for buffer to clear the last window before decreasing the window size
   if (num_acks_til_next_md < 1) {
-    if ( rtt > ceil_threshold_factor * min_rtt ) {
-//      cerr << "************* DROP ********** " << "RTT: " << rtt << ", minRTT: " << min_rtt << endl;
+    if ( rtt > timeout_ms() ) {  /* Check if timeout exceeded */
       num_acks_til_next_md = window_size();
-      cwnd = cwnd/drop_factor;
+      cwnd = cwnd/md_factor;
     } else {
-      cwnd++;
+      cwnd+=ai;
     }
   }
-  if ( rtt < floor_threshold_factor * min_rtt ) {
-//    cerr << "************* Close to min ********** " << "RTT: " << rtt << endl;
-    cwnd++;
-  }
-
-//  if ( rtt > threshold_factor * min_rtt ) {
-//  if (sequence_number_acked - last_sequence_number_acked > 1 ) {
-//    cerr << "!!!Drop. Seqnum acked: " << sequence_number_acked <<", last acked: " << last_sequence_number_acked << endl;
-//    cerr << "acks til next md:" << num_acks_til_next_md << endl;
-//    if (num_acks_til_next_md < 1) {
-//      num_acks_til_next_md = window_size();
-//      cwnd = cwnd/drop_factor;
-//    }
-//  }
-//  cwnd = (cwnd >= max_wnd) ? max_wnd : cwnd+1;
-//  cwnd++;
-
-//  cerr << "acks til next md:" << num_acks_til_next_md << endl;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
