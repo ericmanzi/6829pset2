@@ -49,7 +49,7 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 	 << " sent datagram " << sequence_number << endl;
 //  }
 
-  sent_table[(unsigned int) sequence_number] = send_timestamp;
+  sent_table[(int) sequence_number] = send_timestamp;
   last_sequence_number_sent = sequence_number;
 }
 
@@ -74,11 +74,20 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   }
 
 
-  /* check if timeout exceeded for packets that have not yet been acked */
-
 
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
+
+
+  /* check if timeout exceeded for packets that have not yet been acked */
+  for ( unsigned int i = (int)last_sequence_number_acked; i < (int)last_sequence_number_sent; i++ ) {
+      uint64_t delay_so_far = timestamp_ack_received - sent_table[i];
+      if (delay_so_far > ceil_threshold_factor * min_rtt) {
+        cerr << "*** At time " << timestamp_ack_received << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table << endl;
+      }
+  }
+
+
   // Wait for buffer to clear the last window before decreasing the window size
   if (num_acks_til_next_md < 1) {
     if ( rtt > ceil_threshold_factor * min_rtt ) {
