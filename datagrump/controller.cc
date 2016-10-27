@@ -7,8 +7,8 @@
 using namespace std;
 
 float cwnd = 1;
-float ai = 2;
-float md_factor = 1.5;
+float ai = 1;
+float md_factor = 2;
 unsigned int max_wnd = 22;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
