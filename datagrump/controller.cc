@@ -11,6 +11,7 @@ float ai_init = 1;
 float ai = ai_init;
 float md_factor = 2;
 uint64_t sent_table[50000];
+uint64_t rtt_table[50000];
 uint64_t last_sequence_number_sent = 0;
 uint64_t last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
@@ -77,29 +78,32 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
+  float target_rtt = (1.8 * min_rtt);
 
-  if (num_acks_til_next_md < 1) {
+//  if (num_acks_til_next_md < 1) {
 
     /* check if timeout exceeded for packets that have not yet been acked */
     for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
-      if (delay_so_far > ceil_threshold_factor * min_rtt) {
+      if (delay_so_far > target_rtt) {
   //        cerr << "************" << endl;
   //        cerr << "At time " << timestamp_ms() << ", havent received ack for packet: " << i << ", delay: " << delay_so_far << ", sent at: " << sent_table[i] << ", current rtt: " << rtt << ", last acked:" << last_sequence_number_acked << endl;
   //        cerr << "************" << endl;
 
           // Wait for buffer to clear the last window before decreasing the window size
   //          if ( rtt > ceil_threshold_factor * min_rtt ) {
-          num_acks_til_next_md = (unsigned int) 1.5 * window_size();
-          md_factor = ((rtt/(ceil_threshold_factor * min_rtt)) * 0.1) + 1;
+
+          md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.05) + 1;
           cwnd = cwnd/md_factor;
+
           ai = ai_init;
+          num_acks_til_next_md = (unsigned int) 1.5 * window_size();
           break;
   //          }
 
         }
      }
-  }
+//  }
 
 
 
