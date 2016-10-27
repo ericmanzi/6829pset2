@@ -6,8 +6,9 @@
 
 using namespace std;
 
-float cwnd = 6;
-float ai = 2;
+float cwnd = 1;
+float ai_init = 1;
+float ai = ai_init;
 float md_factor = 2;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
@@ -78,8 +79,10 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     if ( rtt > ceil_threshold_factor * min_rtt ) {
       num_acks_til_next_md = (unsigned int) 1.5 * window_size();
       cwnd = cwnd/md_factor;
+      ai = ai_init;
     }
   }
+  ai *= 2;
   if ( rtt < floor_threshold_factor * min_rtt ) {
     cwnd+=ai;
   } else {
