@@ -76,14 +76,14 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
   // Wait for buffer to clear the last window before decreasing the window size
-  if (num_acks_til_next_md < 1) {
-    if ( rtt > timeout_ms() ) {  /* Check if timeout exceeded */
-      num_acks_til_next_md = window_size();
+//  if (num_acks_til_next_md < 1) {
+    if ( rtt > 1000 ) {  /* Check if timeout exceeded */
+//      num_acks_til_next_md = window_size();
       cwnd = cwnd/md_factor;
     } else {
       cwnd+=ai;
     }
-  }
+//  }
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
