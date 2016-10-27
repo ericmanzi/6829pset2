@@ -44,10 +44,10 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 {
   /* Default: take no action */
 
-  if ( debug_ ) {
+//  if ( debug_ ) {
     cerr << "At time " << send_timestamp
 	 << " sent datagram " << sequence_number << endl;
-  }
+//  }
 
   sent_table[(int) sequence_number] = send_timestamp;
   last_sequence_number_sent = sequence_number;
