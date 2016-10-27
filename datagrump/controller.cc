@@ -91,6 +91,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
           // Wait for buffer to clear the last window before decreasing the window size
   //          if ( rtt > ceil_threshold_factor * min_rtt ) {
           num_acks_til_next_md = (unsigned int) 1.5 * window_size();
+          md_factor = (rtt/(ceil_threshold_factor * min_rtt) * 0.05) + 1;
           cwnd = cwnd/md_factor;
           ai = ai_init;
           break;
