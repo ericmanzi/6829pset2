@@ -81,9 +81,10 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       num_acks_til_next_md = (unsigned int) 2.0 *window_size();
       cwnd = cwnd/md_factor;
     } else {
-      cwnd+=ai;
+//      cwnd+=ai;
     }
   }
+  cwnd+=ai;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
