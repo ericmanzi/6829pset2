@@ -97,8 +97,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
           cwnd = cwnd/md_factor;
 
           ai = ai_init;
-//          num_acks_til_next_md = (unsigned int) 1.5 * window_size();
-          num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+          num_acks_til_next_md = (unsigned int) 1.5 * window_size();
+//          num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
           break;
   //          }
 
