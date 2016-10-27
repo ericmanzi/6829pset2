@@ -7,7 +7,7 @@
 using namespace std;
 
 double cwnd = 1;
-double ai = 1;
+double ai = 2;
 double md_factor = 2;
 unsigned int max_wnd = 22;
 unsigned int last_sequence_number_sent = 0;
@@ -81,8 +81,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       num_acks_til_next_md = (unsigned int) 1.5 * window_size();
       cwnd = cwnd/md_factor;
     } else {
-//      cwnd+=ai/cwnd;
-      cwnd+=1;
+      cwnd+=ai/cwnd;
+//      cwnd+=1;
     }
   }
 
