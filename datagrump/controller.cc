@@ -78,7 +78,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
-  float target_rtt = (1.8 * min_rtt);
+  float target_rtt = (ceil_threshold_factor * min_rtt);
 
 //  if (num_acks_til_next_md < 1) {
 
