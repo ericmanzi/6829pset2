@@ -9,7 +9,6 @@ using namespace std;
 float cwnd = 1;
 float ai = 2;
 float md_factor = 2;
-unsigned int max_wnd = 22;
 unsigned int last_sequence_number_sent = 0;
 unsigned int last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
@@ -76,12 +75,13 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
   // Wait for buffer to clear the last window before decreasing the window size
   if (num_acks_til_next_md < 1) {
-    if ( rtt > timeout_ms() ) {  /* Check if timeout exceeded */
+    if ( rtt > ceil_threshold_factor * min_rtt ) {
       num_acks_til_next_md = (unsigned int) 1.5 * window_size();
       cwnd = cwnd/md_factor;
-    } else {
-//      cwnd+=ai;
     }
+  }
+  if ( rtt < floor_threshold_factor * min_rtt ) {
+    cwnd+=(ai*2)/cwnd;
   }
   cwnd+=ai/cwnd;
 
