@@ -88,35 +88,42 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   if (rtt > target_rtt) {
     float md_delta = 0;
-    if (delta_rtt > 0) {
-      md_delta = cwnd/2.0;
-    } else {
-      md_delta = (( (rtt - target_rtt) / rtt ) * cwnd ) / 2.0;
-    }
-    cwnd -= md_delta;
-    ai = ai_init;
-  } else {
-    ai *= 1.005;
-    if (delta_rtt < 0) {
-      if ( rtt < floor_threshold_factor * min_rtt) {
-        cwnd+=1;
-      } else {
-        cwnd+=ai/cwnd;
-      }
-    }
 
-    /* check if timeout exceeded for packets that have not yet been acked */
-    for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
-      uint64_t delay_so_far = timestamp_ms() - sent_table[i];
-      if (delay_so_far > target_rtt) {
-        cwnd -= 1; //additive decrease
-        break;
-      }
+    if (num_acks_til_next_md < 1) {
+      num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+      cwnd -= (( (rtt - target_rtt) / rtt ) * cwnd ) / 2.0;;
+      ai = ai_init;
+    }
+  } else if ( rtt < floor_threshold_factor * min_rtt) {
+    ai *= 1.005;
+    cwnd+=ai;
+
+  } else if (delta_rtt < 0) {
+    if (rtt < target_rtt) {
+      cwnd+=ai/cwnd;
+    }
+  } else {
+    if (rtt < target_rtt) {
+      cwnd--;
+    } else {
+
     }
   }
-    //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+
+
+  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
 
 //  }
+
+
+  /* check if timeout exceeded for packets that have not yet been acked */
+      for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
+        uint64_t delay_so_far = timestamp_ms() - sent_table[i];
+        if (delay_so_far > target_rtt) {
+          cwnd -= 1; //additive decrease
+          break;
+        }
+      }
 
   cwnd = (cwnd >= 1) ? cwnd : 1;
 
