@@ -86,7 +86,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //  if (num_acks_til_next_md < 1) {
 
   if (rtt > target_rtt) {
-    md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.1) + 1;
+    md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.08) + 1;
     cwnd /= md_factor;
     ai = ai_init;
   } else {
