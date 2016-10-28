@@ -143,7 +143,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
   cwnd = (cwnd > 1) ? cwnd : 1;
-  cerr << "window: " << cwnd << endl;
+//  cerr << "window: " << cwnd << endl;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
