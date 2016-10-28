@@ -147,7 +147,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   cwnd = (cwnd > 1) ? cwnd : 1;
   cerr.width(window_size());
-  cerr.fill("*");
+  cerr.fill('*');
   cerr << endl;
 //  cerr << "window: " << cwnd << endl;
 
