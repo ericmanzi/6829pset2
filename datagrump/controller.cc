@@ -91,6 +91,16 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   cerr << "*************" << endl;
   cerr << "delta_rtt: " << delta_rtt << endl;
   cerr << "rtt: " << rtt << ", critical: " << critical_rtt << endl;
+
+  if (rtt < floor_threshold_factor * min_rtt ) {
+    cwnd++;
+  } else if (rtt > 3.5 * min_rtt) {
+    cwnd--;
+  } else {
+
+
+
+
   if (rtt > critical_rtt) {
 
     if (delta_rtt < 0) {
@@ -129,7 +139,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //  }
 
 
-
+}
 
 
   cwnd = (cwnd > 1) ? cwnd : 1;
