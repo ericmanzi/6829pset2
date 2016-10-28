@@ -7,11 +7,11 @@
 using namespace std;
 
 float cwnd = 1;
-float ai_init = 2;
+float ai_init = 1;
 float ai = ai_init;
 float md_factor = 2;
-float ewma_alpha = 0.9;
 float delta_rtt = 0;
+float ewma_alpha = 0.85;
 float last_rtt = 0;
 
 uint64_t sent_table[50000];
@@ -77,55 +77,62 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 	 << endl;
   }
 
+
+
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
-
-  delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
-  last_rtt = rtt;
   float target_rtt = (ceil_threshold_factor * min_rtt);
+  delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*rtt;
+  last_rtt = rtt;
 
 //  if (num_acks_til_next_md < 1) {
 
   if (rtt > target_rtt) {
-    float md_delta = 0;
 
-    if (num_acks_til_next_md < 1) {
-      num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
-      cwnd -= (( (rtt - target_rtt) / rtt ) * cwnd ) / 2.0;;
-      ai = ai_init;
+    if (delta_rtt < 0) {
+      md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.05) + 1;
+    } else {
+      md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.07) + 1;
     }
-  } else if ( rtt < floor_threshold_factor * min_rtt) {
+
+    cwnd /= md_factor;
+    ai = ai_init;
+  } else { // rtt < target_rtt
+
     ai *= 1.005;
-    cwnd+=ai;
-
-  } else if (delta_rtt < 0) {
-    if (rtt < target_rtt) {
-      cwnd+=ai/cwnd;
-    }
-  } else {
-    if (rtt < target_rtt) {
-      cwnd--;
+    if ( rtt < floor_threshold_factor * min_rtt ) {
+      cwnd+=ai;
     } else {
 
+      if (delta_rtt < 0) {
+        cwnd+ai;
+      } else {
+        cwnd+=ai/cwnd;
+      }
+
+
+    }
+
+    /* check if timeout exceeded for packets that have not yet been acked */
+    for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
+      uint64_t delay_so_far = timestamp_ms() - sent_table[i];
+      if (delay_so_far > target_rtt) {
+        cwnd /= 1.5; //mult decrease
+
+    //  num_acks_til_next_md = (unsigned int) 1.5 * window_size();
+    //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+        break;
+      }
     }
   }
-
-
-  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
 
 //  }
 
 
-  /* check if timeout exceeded for packets that have not yet been acked */
-      for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
-        uint64_t delay_so_far = timestamp_ms() - sent_table[i];
-        if (delay_so_far > target_rtt) {
-          cwnd -= 1; //additive decrease
-          break;
-        }
-      }
 
-  cwnd = (cwnd >= 1) ? cwnd : 1;
+
+
+  cwnd = (cwnd > 1) ? cwnd : 1;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
