@@ -15,6 +15,7 @@ float ad = 1;
 float delta_rtt = 0;
 float ewma_alpha = 0.8;
 float last_rtt = 0;
+float max_cwnd = 80;
 
 uint64_t sent_table[50000];
 uint64_t last_sequence_number_sent = 0;
@@ -141,6 +142,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
   cwnd = (cwnd > 6) ? cwnd : 6;
+  cwnd = (cwnd < max_cwnd) ? cwnd : max_cwnd;
   cerr << string(window_size(), '.') << "  " << rtt << endl;
 //  cerr << "window: " << cwnd << endl;
 
