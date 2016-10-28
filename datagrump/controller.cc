@@ -77,7 +77,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if (num_acks_til_next_md < 1) {
     if ( rtt > ceil_threshold_factor * min_rtt ) {
       num_acks_til_next_md = (unsigned int) 1.5 * window_size();
-      cwnd = cwnd/md_factor;
+//      cwnd = cwnd/md_factor;
+      cwnd--;
     }
   }
   if ( rtt < floor_threshold_factor * min_rtt ) {
