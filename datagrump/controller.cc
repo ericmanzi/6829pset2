@@ -18,7 +18,7 @@ uint64_t sent_table[50000];
 uint64_t last_sequence_number_sent = 0;
 uint64_t last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
-uint64_t min_rtt = (uint64_t) UINT_MAX/100;
+uint64_t min_rtt = (uint64_t) 100;
 unsigned int ceil_threshold_factor = 2.4;
 unsigned int floor_threshold_factor = 1.1;
 
@@ -82,7 +82,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
   float target_rtt = (ceil_threshold_factor * min_rtt);
-  delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*rtt;
+  delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
   last_rtt = rtt;
 
 //  if (num_acks_til_next_md < 1) {
@@ -90,12 +90,15 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if (rtt > target_rtt) {
 
     if (delta_rtt < 0) {
-      md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.05) + 1;
+//      md_factor = (( (rtt-target_rtt) / rtt ) * 0.04) + 1;
+      md_factor = ( (rtt - target_rtt) / rtt ) * cwnd/2.5;
     } else {
-      md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.07) + 1;
+//      md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.07) + 1;
+      md_factor = ( (rtt - target_rtt) / rtt ) * cwnd/2.5;
     }
 
-    cwnd /= md_factor;
+//    cwnd /= md_factor;
+    cwnd -= md_factor;
     ai = ai_init;
   } else { // rtt < target_rtt
 
@@ -119,7 +122,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       if (delay_so_far > target_rtt) {
         cwnd /= 1.01; //mult decrease
 
-    //  num_acks_til_next_md = (unsigned int) 1.5 * window_size();
+    //  num_acks_til_next_md = window_size();
     //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
         break;
       }
