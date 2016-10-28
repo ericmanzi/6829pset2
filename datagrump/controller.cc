@@ -90,7 +90,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if (rtt > target_rtt) {
     float md_delta = 0;
     if (delta_rtt > 0) {
-      md_delta = 1;
+      md_delta = cwnd/2.0;
     } else {
       md_delta = (( (rtt-target_rtt) / rtt ) * cwnd ) / 2.0;
     }
