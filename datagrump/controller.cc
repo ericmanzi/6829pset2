@@ -13,6 +13,7 @@ float md_factor = 2;
 float ewma_alpha = 0.85;
 float delta_rtt = 0;
 float last_rtt = 0;
+float rtt_diff = 0;
 
 uint64_t sent_table[50000];
 uint64_t last_sequence_number_sent = 0;
@@ -84,8 +85,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   float target_rtt = (ceil_threshold_factor * min_rtt);
 
-  rtt_diff = ALPHA * (int)(rtt - prev_rtt_) + (1.0 - ALPHA) * rtt_diff_;
-
+  rtt_diff = ALPHA * (int)(rtt - last_rtt) + (1.0 - ALPHA) * rtt_diff;
+  last_rtt = rtt;
 
 //  if (num_acks_til_next_md < 1) {
 
