@@ -88,7 +88,9 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   last_rtt = rtt;
 
 //  if (num_acks_til_next_md < 1) {
-
+  cerr << "*************" << endl;
+  cerr << "delta_rtt: " << delta_rtt << end;
+  cerr << "rtt: " << rtt << ", critical: " << critical_rtt << endl;
   if (rtt > critical_rtt) {
 
     if (delta_rtt < 0) {
@@ -96,6 +98,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     } else { // delta_rtt > 0
       ad = 1;
     }
+    cerr << "ad: " << ad << endl;
     cwnd -= ad;
     ai = ai_init;
   } else { // rtt < target_rtt
@@ -130,6 +133,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
   cwnd = (cwnd > 1) ? cwnd : 1;
+  cerr << "window: " << cwnd << endl;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
