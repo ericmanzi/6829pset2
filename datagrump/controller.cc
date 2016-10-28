@@ -15,7 +15,7 @@ float ad = 1;
 float delta_rtt = 0;
 float ewma_alpha = 0.8;
 float last_rtt = 0;
-float max_cwnd = 80;
+//float max_cwnd = 80;
 
 uint64_t sent_table[50000];
 uint64_t last_sequence_number_sent = 0;
@@ -111,9 +111,9 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
         ad = (rtt / critical_rtt) * 1.2;
       }
 //      cerr << "ad: " << ad << endl;
-      ad=cwnd;//DT
 
-      cwnd -= ad/cwnd;
+//      cwnd -= ad/cwnd;
+      cwnd -= 1;
       ai = ai_init;
     } else { // rtt < critical_rtt
 
