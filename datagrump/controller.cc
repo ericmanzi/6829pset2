@@ -1,45 +1,44 @@
 #include <iostream>
-#include <limits.h>
-#include <cmath>
 
 #include "controller.hh"
 #include "timestamp.hh"
 
 using namespace std;
 
-float cwnd = 1;
-float ai_init = 1;
-float ai = ai_init;
-float md_factor = 2;
-float ad = 1;
-float delta_rtt = 0;
-float ewma_alpha = 0.8;
-float last_rtt = 0;
+#define ALPHA 0.3
+#define BETA 0.5
+#define LOWER_THRESH (1.1 * min_rtt_)
+#define UPPER_THRESH (3 * min_rtt_)
+#define TARGET_RTT (2 * min_rtt_)
 
-uint64_t sent_table[50000];
-uint64_t last_sequence_number_sent = 0;
-uint64_t last_sequence_number_acked = 0;
-unsigned int num_acks_til_next_md = 0;
-uint64_t min_rtt = (uint64_t) 100;
-unsigned int ceil_threshold_factor = 2.4;
-unsigned int floor_threshold_factor = 1.1;
+unsigned int window_size_=1;
+
+  unsigned int num_ack_until_increment_=0;
+
+  uint64_t prev_rtt_=0;
+
+  uint64_t min_rtt_=0;
+
+  double rtt_diff_=0.0;
+
+  uint64_t md_interval_=0;
+
 
 /* Default constructor */
 Controller::Controller( const bool debug )
   : debug_( debug )
-{}
+{
+}
 
 /* Get current window size, in datagrams */
 unsigned int Controller::window_size( void )
 {
-  /* Default: fixed window size of 100 outstanding datagrams */
-  unsigned int the_window_size = (unsigned int) cwnd;
-
   if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
-	 << " window size is " << the_window_size << endl;
+	 << " window size is " << window_size_ << endl;
   }
-  return the_window_size;
+
+  return window_size_;
 }
 
 /* A datagram was sent */
@@ -48,15 +47,10 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 				    const uint64_t send_timestamp )
                                     /* in milliseconds */
 {
-  /* Default: take no action */
-
   if ( debug_ ) {
     cerr << "At time " << send_timestamp
 	 << " sent datagram " << sequence_number << endl;
   }
-
-  sent_table[(int) sequence_number] = send_timestamp;
-  last_sequence_number_sent = sequence_number;
 }
 
 /* An ack was received */
@@ -69,7 +63,92 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 			       const uint64_t timestamp_ack_received )
                                /* when the ack was received (by sender) */
 {
-  /* Default: take no action */
+  uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
+  if(min_rtt_ == 0 || rtt < min_rtt_) min_rtt_ = rtt;
+  if(prev_rtt_ == 0) prev_rtt_ = rtt;
+  if(md_interval_ > 0) md_interval_--;;
+
+  rtt_diff_ = ALPHA * (int)(rtt - prev_rtt_) + (1.0 - ALPHA) * rtt_diff_;
+
+  // Queue is nearly empty
+  if(rtt < LOWER_THRESH) {
+    // Aggressively increase the window size
+    window_size_ ++;
+
+    num_ack_until_increment_ = 0;
+
+  // Queue is nearly flooded
+  } else if (rtt > UPPER_THRESH) {
+
+    /* If MD happens lately, wait until the effect is noticeable.
+       The reasoning here is, we do not want to penalty the window multiple times.
+       When congestion happens, packets sent in same window time would suffer
+       the congestion altogether. So we should wait for some time until
+       MD's effect can be noticeable. */
+    if(md_interval_ == 0) {
+      md_interval_ = window_size_;
+      double coeff = BETA * (1.0 - (TARGET_RTT/(double)rtt));
+      window_size_ *= (1.0 - coeff);
+      if(window_size_ < 1) window_size_ = 1;
+
+      num_ack_until_increment_ = 0;
+    }
+
+  // Queue is draining
+  } else if (rtt_diff_ <= 0) {
+
+    /* If rtt is larger than TARGET_RTT, do nothing, hoping congestion would be
+       resolved naturally.
+       If rtt is smaller than TARGET_RTT, we should inflate the window size not
+       to waste throughput. */
+    if(rtt <= TARGET_RTT) {
+      num_ack_until_increment_ ++;
+      if(num_ack_until_increment_ == 1.5 * window_size_) {
+        num_ack_until_increment_ = 0;
+        window_size_ ++;
+      }
+    }
+
+  // Queue is filling up
+  } else { // rtt_diff_ > 0
+
+    /* If rtt is larger than TARGET_RTT, aggressively deflate the window to
+       resolve the congestion asap. */
+    if(rtt > TARGET_RTT) {
+      if(window_size_ > 1) {
+        window_size_ --;
+        num_ack_until_increment_ = 0;
+      }
+
+    // If rtt is smaller than TARGET_RTT, divide the case.
+    } else {
+
+      // If queue is filling up slowly, inflate the window to saturate the link.
+      if((TARGET_RTT - rtt) * 2 > rtt_diff_ * window_size_) {
+        num_ack_until_increment_ ++;
+        if(num_ack_until_increment_ == 1.5 * window_size_) {
+          num_ack_until_increment_ = 0;
+          window_size_ ++;
+        }
+
+      // If queue is filling up rapidly, slowly deflate the window as we expect
+      // congestion shortly.
+      } else if ((TARGET_RTT - rtt) * 4 < rtt_diff_ * window_size_) {
+        if(window_size_ > 1) {
+          if(num_ack_until_increment_ == 0) {
+            window_size_ --;
+            num_ack_until_increment_ = 1.5 * window_size_;
+
+          } else
+            num_ack_until_increment_ --;
+        }
+      }
+    }
+  }
+
+  prev_rtt_ = rtt;
+
+  cerr << string(window_size(), '.') << "  " << rtt << endl;
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
@@ -78,82 +157,11 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 	 << ", received @ time " << recv_timestamp_acked << " by receiver's clock)"
 	 << endl;
   }
-
-
-
-  uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
-  min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
-  float critical_rtt = (2.1 * min_rtt);
-  delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
-
-
-//  if (num_acks_til_next_md < 1) {
-//  cerr << "*************" << endl;
-//  cerr << "delta_rtt: " << delta_rtt << endl;
-//  cerr << "rtt: " << rtt << ", critical: " << critical_rtt << endl;
-
-
-
-  if (rtt < floor_threshold_factor * min_rtt ) {
-    cwnd += (ai*3.0)/cwnd;
-  } else if (rtt > 2.8 * min_rtt) {
-//    cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
-    cwnd -= ad;
-    ai = ai_init;
-  } else {
-
-    if (rtt > critical_rtt) {
-
-      if (delta_rtt < 0) {
-        ad = (rtt / critical_rtt) * 0.5;
-      } else { // delta_rtt > 0
-        ad = (rtt / critical_rtt) * 1.2;
-      }
-//      cerr << "ad: " << ad << endl;
-      cwnd -= ad/cwnd;
-      ai = ai_init;
-    } else { // rtt < critical_rtt
-
-      ai *= 1.005;
-
-      if (delta_rtt < 0) {
-        cwnd+= (ai * (critical_rtt/rtt) * 3.0)/cwnd;
-      } else {
-        cwnd+=ai/cwnd;
-      }
-    }
-
-    /* check if timeout exceeded for packets that have not yet been acked */
-    for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
-      uint64_t delay_so_far = timestamp_ms() - sent_table[i];
-      if (delay_so_far > critical_rtt) {
-        if (num_acks_til_next_md < 1) {
-          cwnd -= ai;
-          num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
-        }
-        break;
-      }
-    }
-
-    }
-
-//  }
-
-
-  cwnd = (cwnd > 6) ? cwnd : 6;
-  cerr << string(window_size(), '.') << "  " << rtt << endl;
-//  cerr << "window: " << cwnd << endl;
-
-  if (num_acks_til_next_md > 0) num_acks_til_next_md--;
-  last_sequence_number_acked = sequence_number_acked;
-  last_rtt = rtt;
-
 }
 
 /* How long to wait (in milliseconds) if there are no acks
    before sending one more datagram */
 unsigned int Controller::timeout_ms( void )
 {
-  return (unsigned int) ceil_threshold_factor * min_rtt;
-//  return 110;
+  return (min_rtt_ == 0) ? 100 : 2 * min_rtt_;
 }
