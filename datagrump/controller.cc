@@ -89,7 +89,12 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //  if (num_acks_til_next_md < 1) {
 
   if (rtt > target_rtt) {
-    float md_delta = (( (rtt-target_rtt) / rtt ) * cwnd ) / 2.0;
+    float md_delta = 0;
+    if (delta_rtt > 0) {
+      md_delta = 1;
+    } else {
+      md_delta = (( (rtt-target_rtt) / rtt ) * cwnd ) / 2.0;
+    }
     cwnd -= md_delta;
     ai = ai_init;
   } else {
@@ -111,8 +116,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
   ai *= 1.005;
-  if ( rtt < floor_threshold_factor * min_rtt ) {
-    cwnd+=ai;
+  if ( rtt < floor_threshold_factor * min_rtt || delta_rtt < 0) {
+    cwnd+=1;
   } else {
     cwnd+=ai/cwnd;
   }
