@@ -13,7 +13,6 @@ float md_factor = 2;
 float ewma_alpha = 0.85;
 float delta_rtt = 0;
 float last_rtt = 0;
-float rtt_diff = 0;
 
 uint64_t sent_table[50000];
 uint64_t last_sequence_number_sent = 0;
@@ -82,10 +81,10 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
 
   delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
+  last_rtt = rtt;
 
   float target_rtt = (ceil_threshold_factor * min_rtt);
 
-  last_rtt = rtt;
 
 //  if (num_acks_til_next_md < 1) {
 
@@ -98,7 +97,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > target_rtt) {
-        cwnd /= 1.5; //mult decrease
+        cwnd -= 1/cwnd; //additive decrease
 
     //  num_acks_til_next_md = (unsigned int) 1.5 * window_size();
     //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
