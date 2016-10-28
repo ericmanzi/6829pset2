@@ -11,7 +11,7 @@ float cwnd = 1;
 float ai_init = 1;
 float ai = ai_init;
 float md_factor = 2;
-float ad = 0;
+float ad = 1;
 float delta_rtt = 0;
 float ewma_alpha = 0.8;
 float last_rtt = 0;
@@ -83,7 +83,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
-  float critical_rtt = (2.0 * min_rtt);
+  float critical_rtt = (2.2 * min_rtt);
   delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
   last_rtt = rtt;
 
@@ -92,36 +92,32 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //  cerr << "delta_rtt: " << delta_rtt << endl;
 //  cerr << "rtt: " << rtt << ", critical: " << critical_rtt << endl;
 
+
+
   if (rtt < floor_threshold_factor * min_rtt ) {
-    cwnd++;
-  } else if (rtt > 3 * min_rtt) {
-    if (num_acks_til_next_md < 1) {
-      cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
-      num_acks_til_next_md = window_size();
-    }
+    cwnd += ai;
+  } else if (rtt > 4.0 * min_rtt) {
+//    cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
+    cwnd -= ad * 1.5;
+    ai = ai_init;
   } else {
 
+    if (rtt > critical_rtt) {
 
-
-
-  if (rtt > critical_rtt) {
-
-    if (delta_rtt < 0) {
-      ad = pow(((rtt - critical_rtt) / (rtt * 3.0)),2) / cwnd;
-    } else { // delta_rtt > 0
-      ad = 1;
-    }
-//    cerr << "ad: " << ad << endl;
-    cwnd -= ad;
-    ai = ai_init;
-  } else { // rtt < target_rtt
-
-    ai *= 1.005;
-    if ( rtt < floor_threshold_factor * min_rtt ) {
-      cwnd+=ai;
-    } else {
       if (delta_rtt < 0) {
-        cwnd+=ai;
+        ad = (rtt / critical_rtt) * 3.0;
+      } else { // delta_rtt > 0
+        ad = cwnd;
+      }
+//      cerr << "ad: " << ad << endl;
+      cwnd -= ad/cwnd;
+      ai = ai_init;
+    } else { // rtt < critical_rtt
+
+      ai *= 1.005;
+
+      if (delta_rtt < 0) {
+        cwnd+=(ai * (critical_rtt/rtt) * 3.0)/cwnd;
       } else {
         cwnd+=ai/cwnd;
       }
@@ -131,18 +127,20 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > critical_rtt) {
-        cwnd -= ai/cwnd; //additive decrease
-    //  num_acks_til_next_md = window_size();
-    //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+        if (num_acks_til_next_md < 1) {
+          cwnd -= ai;
+          num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+        }
         break;
       }
     }
-  }
+
+    }
 
 //  }
 
 
-}
+  }
 
 
   cwnd = (cwnd > 1) ? cwnd : 1;
