@@ -10,8 +10,8 @@ float cwnd = 1;
 float ai_init = 1;
 float ai = ai_init;
 float md_factor = 2;
+float avg_rtt = 0;
 uint64_t sent_table[50000];
-uint64_t rtt_table[50000];
 uint64_t last_sequence_number_sent = 0;
 uint64_t last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
@@ -80,7 +80,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
   float target_rtt = (ceil_threshold_factor * min_rtt);
 
-  if (num_acks_til_next_md < 1) {
+//  if (num_acks_til_next_md < 1) {
 
     /* check if timeout exceeded for packets that have not yet been acked */
     for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
@@ -93,18 +93,18 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
           // Wait for buffer to clear the last window before decreasing the window size
   //          if ( rtt > ceil_threshold_factor * min_rtt ) {
 
-//          md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.05) + 1;
-          cwnd = cwnd/md_factor;
+          md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.05) + 1;
+//          cwnd = cwnd/md_factor;
 
           ai = ai_init;
 //          num_acks_til_next_md = (unsigned int) 1.5 * window_size();
-          num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+//          num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
           break;
   //          }
 
         }
      }
-  }
+//  }
 
 
 
