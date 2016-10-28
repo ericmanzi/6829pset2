@@ -105,9 +105,9 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     if (rtt > critical_rtt) {
 
       if (delta_rtt < 0) {
-        ad = (rtt / critical_rtt) * 3.0;
+        ad = (rtt / critical_rtt) * 0.5;
       } else { // delta_rtt > 0
-        ad = cwnd / 4.0;
+        ad = (rtt / critical_rtt) * 1.2;
       }
 //      cerr << "ad: " << ad << endl;
       cwnd -= ad/cwnd;
