@@ -97,7 +97,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   } else if (rtt > 3.5 * min_rtt) {
     if (num_acks_til_next_md < 1) {
       cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
-      num_acks_til_next_md--;
+      num_acks_til_next_md = sequence_number_acked - last_sequence_number_sent;
     }
   } else {
 
