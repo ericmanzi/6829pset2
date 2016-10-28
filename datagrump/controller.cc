@@ -111,6 +111,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
         ad = (rtt / critical_rtt) * 1.2;
       }
 //      cerr << "ad: " << ad << endl;
+      ad=1;//DT
       cwnd -= ad/cwnd;
       ai = ai_init;
     } else { // rtt < critical_rtt
