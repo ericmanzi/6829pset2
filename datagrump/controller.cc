@@ -10,8 +10,9 @@ float cwnd = 1;
 float ai_init = 1;
 float ai = ai_init;
 float md_factor = 2;
-float avg_rtt = 0;
 float ewma_alpha = 0.85;
+float delta_rtt = 0;
+float last_rtt = 0;
 
 uint64_t sent_table[50000];
 uint64_t last_sequence_number_sent = 0;
@@ -76,18 +77,21 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 	 << endl;
   }
 
-
-
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
+
+  delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
+
   float target_rtt = (ceil_threshold_factor * min_rtt);
-  avg_rtt = ewma_alpha * avg_rtt + (1.0 - ewma_alpha)*rtt;
+
+  rtt_diff = ALPHA * (int)(rtt - prev_rtt_) + (1.0 - ALPHA) * rtt_diff_;
+
 
 //  if (num_acks_til_next_md < 1) {
 
   if (rtt > target_rtt) {
-    md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.07) + 1;
-    cwnd /= md_factor;
+    float md_delta = (( (rtt-target_rtt) / rtt ) * cwnd ) / 2.0;
+    cwnd -= md_delta;
     ai = ai_init;
   } else {
     /* check if timeout exceeded for packets that have not yet been acked */
