@@ -83,9 +83,9 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
-  float critical_rtt = (2.2 * min_rtt);
+  float critical_rtt = (2.1 * min_rtt);
   delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
-  last_rtt = rtt;
+
 
 //  if (num_acks_til_next_md < 1) {
 //  cerr << "*************" << endl;
@@ -95,10 +95,10 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
   if (rtt < floor_threshold_factor * min_rtt ) {
-    cwnd += ai;
-  } else if (rtt > 4.0 * min_rtt) {
+    cwnd += (ai*3.0)/cwnd;
+  } else if (rtt > 2.8 * min_rtt) {
 //    cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
-    cwnd -= ad * 1.5;
+    cwnd -= ad;
     ai = ai_init;
   } else {
 
@@ -107,7 +107,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       if (delta_rtt < 0) {
         ad = (rtt / critical_rtt) * 3.0;
       } else { // delta_rtt > 0
-        ad = cwnd;
+        ad = cwnd / 4.0;
       }
 //      cerr << "ad: " << ad << endl;
       cwnd -= ad/cwnd;
@@ -117,7 +117,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       ai *= 1.005;
 
       if (delta_rtt < 0) {
-        cwnd+=(ai * (critical_rtt/rtt) * 3.0)/cwnd;
+        cwnd+= (ai * (critical_rtt/rtt) * 3.0)/cwnd;
       } else {
         cwnd+=ai/cwnd;
       }
@@ -146,7 +146,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
-
+  last_rtt = rtt;
 
 }
 
