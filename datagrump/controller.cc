@@ -93,7 +93,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //  cerr << "rtt: " << rtt << ", critical: " << critical_rtt << endl;
 
   if (rtt < floor_threshold_factor * min_rtt ) {
-    cwnd+=5*ai/cwnd;
+    cwnd++;
   } else if (rtt > 3.5 * min_rtt) {
     if (num_acks_til_next_md < 1) {
       cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
