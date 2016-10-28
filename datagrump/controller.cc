@@ -95,13 +95,13 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 
 
-//  if (rtt < floor_threshold_factor * min_rtt ) {
-//    cwnd += (ai*3.0)/cwnd;
-//  } else if (rtt > 2.8 * min_rtt) {
-////    cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
-//    cwnd -= ad;
-//    ai = ai_init;
-//  } else {
+  if (rtt < floor_threshold_factor * min_rtt ) {
+    cwnd += ai;
+  } else if (rtt > 2.8 * min_rtt) {
+//    cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
+    cwnd -= ad;
+    ai = ai_init;
+  } else {
 
     if (rtt > critical_rtt) {
 
