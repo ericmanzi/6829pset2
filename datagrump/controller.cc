@@ -118,7 +118,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 //  }
 
-  cwnd = std::max(cwnd, 1);
+  cwnd = (cwnd >= 1) ? cwnd : 1;
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
