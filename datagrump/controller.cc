@@ -10,7 +10,7 @@ float cwnd = 1;
 float ai_init = 2;
 float ai = ai_init;
 float md_factor = 2;
-float ewma_alpha = 0.85;
+float ewma_alpha = 0.9;
 float delta_rtt = 0;
 float last_rtt = 0;
 
@@ -91,7 +91,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     if (delta_rtt > 0) {
       md_delta = cwnd/2.0;
     } else {
-      md_delta = (( (rtt-target_rtt) / rtt ) * cwnd ) / 2.0;
+      md_delta = (( (rtt - target_rtt) / rtt ) * cwnd ) / 2.0;
     }
     cwnd -= md_delta;
     ai = ai_init;
