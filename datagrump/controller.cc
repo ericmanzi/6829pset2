@@ -7,7 +7,7 @@
 using namespace std;
 
 float cwnd = 1;
-float ai_init = 1;
+float ai_init = 2;
 float ai = ai_init;
 float md_factor = 2;
 float ewma_alpha = 0.85;
@@ -104,7 +104,6 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       if (delay_so_far > target_rtt) {
         cwnd -= 1/cwnd; //additive decrease
 
-    //  num_acks_til_next_md = (unsigned int) 1.5 * window_size();
     //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
         break;
       }
