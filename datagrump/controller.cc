@@ -88,14 +88,14 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if (rtt > target_rtt) {
     md_factor = (( (rtt-target_rtt) / target_rtt ) * 0.05) + 1;
     cwnd /= md_factor;
+    ai = ai_init;
   } else {
     /* check if timeout exceeded for packets that have not yet been acked */
     for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > target_rtt) {
-        md_factor = cwnd-=ai/cwnd;//additive decrease
-        cwnd /= md_factor;
-        ai = ai_init;
+        cwnd -= 3/cwnd; //additive decrease
+
     //  num_acks_til_next_md = (unsigned int) 1.5 * window_size();
     //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
         break;
