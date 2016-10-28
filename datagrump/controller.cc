@@ -105,7 +105,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     } else {
 
       if (delta_rtt < 0) {
-        cwnd+ai;
+        cwnd+=ai;
       } else {
         cwnd+=ai/cwnd;
       }
