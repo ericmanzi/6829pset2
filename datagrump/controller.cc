@@ -89,7 +89,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
 //  if (num_acks_til_next_md < 1) {
   cerr << "*************" << endl;
-  cerr << "delta_rtt: " << delta_rtt << end;
+  cerr << "delta_rtt: " << delta_rtt << endl;
   cerr << "rtt: " << rtt << ", critical: " << critical_rtt << endl;
   if (rtt > critical_rtt) {
 
