@@ -82,7 +82,6 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
   last_rtt = rtt;
-  cerr << "delta rtt:" << delta_rtt << endl;
   float target_rtt = (ceil_threshold_factor * min_rtt);
 
 //  if (num_acks_til_next_md < 1) {
