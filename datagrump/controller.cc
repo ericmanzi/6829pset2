@@ -117,7 +117,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > target_rtt) {
-        cwnd /= 1.5; //mult decrease
+        cwnd /= 1.02; //mult decrease
 
     //  num_acks_til_next_md = (unsigned int) 1.5 * window_size();
     //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
