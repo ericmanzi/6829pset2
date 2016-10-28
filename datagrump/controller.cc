@@ -98,28 +98,31 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     cwnd -= md_delta;
     ai = ai_init;
   } else {
+    ai *= 1.005;
+    if (delta_rtt < 0) {
+      if ( rtt < floor_threshold_factor * min_rtt) {
+        cwnd+=1;
+      } else {
+        cwnd+=ai/cwnd;
+      }
+    }
+
+
     /* check if timeout exceeded for packets that have not yet been acked */
     for ( uint64_t i = sequence_number_acked; i < std::max(last_sequence_number_sent, sequence_number_acked+1); i++ ) {
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > target_rtt) {
-        cwnd -= 1/cwnd; //additive decrease
+        cwnd -= 1; //additive decrease
 
-    //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
         break;
       }
     }
   }
+    //  num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
 
 //  }
 
 
-
-  ai *= 1.005;
-  if ( rtt < floor_threshold_factor * min_rtt || delta_rtt < 0) {
-    cwnd+=1;
-  } else {
-    cwnd+=ai/cwnd;
-  }
 
   if (num_acks_til_next_md > 0) num_acks_til_next_md--;
   last_sequence_number_acked = sequence_number_acked;
