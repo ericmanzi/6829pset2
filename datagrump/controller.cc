@@ -143,7 +143,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   }
 
 
-  cwnd = (cwnd > 3) ? cwnd : 4;
+  cwnd = (cwnd > 3) ? cwnd : 3;
 //  cwnd = (cwnd < max_cwnd) ? cwnd : max_cwnd;
   cerr << string(window_size(), '.') << "  " << rtt << endl;
 //  cerr << "window: " << cwnd << endl;
