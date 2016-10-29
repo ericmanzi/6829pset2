@@ -158,6 +158,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
    before sending one more datagram */
 unsigned int Controller::timeout_ms( void )
 {
-  return (unsigned int) ceil_threshold_factor * min_rtt;
+  return (unsigned int) min_rtt;
+//  return (unsigned int) ceil_threshold_factor * min_rtt;
 //  return 110;
 }
