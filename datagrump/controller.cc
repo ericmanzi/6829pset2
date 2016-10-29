@@ -14,14 +14,14 @@ float md_factor = 2;
 float ad = 1;
 float delta_rtt = 0;
 float ewma_alpha = 0.8;
-float last_rtt = 0;
+float last_rtt = 50;
 //float max_cwnd = 80;
 
 uint64_t sent_table[50000];
 uint64_t last_sequence_number_sent = 0;
 uint64_t last_sequence_number_acked = 0;
 unsigned int num_acks_til_next_md = 0;
-uint64_t min_rtt = (uint64_t) 100;
+uint64_t min_rtt = (uint64_t) 50;
 unsigned int ceil_threshold_factor = 2.4;
 unsigned int floor_threshold_factor = 1.1;
 
@@ -98,12 +98,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if (rtt < floor_threshold_factor * min_rtt ) {
     cwnd += ai;
   } else if (rtt > 3.2 * min_rtt) {
-    if (num_acks_til_next_md < 1) {
-      cwnd -= ad;
-      num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
-      ai = ai_init;
-    }
-//    cwnd -= ad;
+    cwnd -= ad;
+    ai = ai_init;
   } else {
 
     if (rtt > critical_rtt) {
@@ -116,13 +112,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //      cerr << "ad: " << ad << endl;
 
 //      cwnd -= ad/cwnd;
-      if (num_acks_til_next_md < 1) {
-        cwnd -= ad;
-        num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
-        ai = ai_init;
-      }
-//      cwnd -= ad;
-//      ai = ai_init;
+      cwnd -= ad;
+      ai = ai_init;
     } else { // rtt < critical_rtt
 
 
