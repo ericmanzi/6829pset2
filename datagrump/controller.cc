@@ -84,7 +84,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
   min_rtt = (rtt < min_rtt) ? rtt : min_rtt;
-  float critical_rtt = (2.1 * min_rtt);
+  float critical_rtt = (2.3 * min_rtt);
   delta_rtt = ewma_alpha * (rtt - last_rtt) + (1.0 - ewma_alpha)*delta_rtt;
 
 
@@ -97,7 +97,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   if (rtt < floor_threshold_factor * min_rtt ) {
     cwnd += ai;
-  } else if (rtt > 3.1 * min_rtt) {
+  } else if (rtt > 2.9 * min_rtt) {
     cwnd -= ad;
     ai = ai_init;
   } else {
