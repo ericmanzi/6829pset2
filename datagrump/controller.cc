@@ -121,7 +121,14 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       ai *= 1.005;
         cwnd+= ai*2/cwnd;
       } else { // delta_rtt > 0
-        cwnd+=ai*0.2/cwnd;
+//        cwnd+=ai*0.2/cwnd;
+
+        if ((critical_rtt - rtt) > delta_rtt*cwnd/2) {
+          cwnd+=ai/cwnd;
+        } else if ((critical_rtt - rtt) < delta_rtt*cwnd/4 ) {
+          cwnd-=ad/cwnd;
+        }
+
       }
     }
 
