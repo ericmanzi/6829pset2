@@ -105,7 +105,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
     if (rtt > critical_rtt) {
 
       if (delta_rtt < 0) {
-        ad = (rtt / critical_rtt) * 0.1;
+        ad = (rtt / critical_rtt) * 0.05;
       } else { // delta_rtt > 0
         ad = (rtt / critical_rtt) * 0.5;
       }
@@ -116,9 +116,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       ai = ai_init;
     } else { // rtt < critical_rtt
 
-//      ai *= 1.005;
-
       if (delta_rtt < 0) {
+        ai *= 1.005;
         cwnd+= ai*3/cwnd;
       } else { // delta_rtt > 0
         cwnd+=ai*0.2/cwnd;
@@ -131,6 +130,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       if (delay_so_far > critical_rtt) {
         if (num_acks_til_next_md < 1) {
           cwnd -= ad;
+          ai = ai_init;
           num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
         }
         break;
