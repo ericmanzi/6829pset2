@@ -97,7 +97,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
   if (rtt < floor_threshold_factor * min_rtt ) {
     cwnd += ai;
-  } else if (rtt > 2.9 * min_rtt) {
+  } else if (rtt > 3.2 * min_rtt) {
     cwnd -= ad;
     ai = ai_init;
   } else {
@@ -119,7 +119,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 
       if (delta_rtt < 0) {
         ai *= 1.005;
-        cwnd+= ai*2/cwnd;
+        cwnd+= ai*5.0/cwnd;
       } else { // delta_rtt > 0
         cwnd+=ai*0.2/cwnd;
       }
@@ -158,6 +158,6 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
    before sending one more datagram */
 unsigned int Controller::timeout_ms( void )
 {
-  return (unsigned int) 2.0 * min_rtt;
+  return (unsigned int) ceil_threshold_factor * min_rtt;
 //  return 110;
 }
