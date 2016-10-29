@@ -98,8 +98,12 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if (rtt < floor_threshold_factor * min_rtt ) {
     cwnd += ai;
   } else if (rtt > 3.2 * min_rtt) {
-    cwnd -= ad;
-    ai = ai_init;
+    if (num_acks_til_next_md < 1) {
+      cwnd -= ad;
+      num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+      ai = ai_init;
+    }
+//    cwnd -= ad;
   } else {
 
     if (rtt > critical_rtt) {
@@ -112,23 +116,21 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 //      cerr << "ad: " << ad << endl;
 
 //      cwnd -= ad/cwnd;
-      cwnd -= ad;
-      ai = ai_init;
+      if (num_acks_til_next_md < 1) {
+        cwnd -= ad;
+        num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
+        ai = ai_init;
+      }
+//      cwnd -= ad;
+//      ai = ai_init;
     } else { // rtt < critical_rtt
 
 
       if (delta_rtt < 0) {
-      ai *= 1.005;
+        ai *= 1.005;
         cwnd+= ai*2/cwnd;
       } else { // delta_rtt > 0
-//        cwnd+=ai*0.2/cwnd;
-
-        if ((critical_rtt - rtt) > delta_rtt*cwnd/2) {
-          cwnd+=ai/cwnd;
-        } else if ((critical_rtt - rtt) < delta_rtt*cwnd/4 ) {
-          cwnd-=ad/cwnd;
-        }
-
+        cwnd+=ai*0.2/cwnd;
       }
     }
 
