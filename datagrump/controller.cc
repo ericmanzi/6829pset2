@@ -130,7 +130,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > critical_rtt) {
         if (num_acks_til_next_md < 1) {
-          cwnd /= 2;
+          cwnd -= 2;
           num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
         }
         break;
