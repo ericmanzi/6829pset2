@@ -107,7 +107,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       if (delta_rtt < 0) {
         ad = (rtt / critical_rtt) * 0.1;
       } else { // delta_rtt > 0
-        ad = (rtt / critical_rtt) * 0.6;
+        ad = (rtt / critical_rtt) * 0.7;
       }
 //      cerr << "ad: " << ad << endl;
 
@@ -143,7 +143,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   }
 
 
-  cwnd = (cwnd > 3) ? cwnd : 3;
+  cwnd = (cwnd > 1) ? cwnd : 1;
 //  cwnd = (cwnd < max_cwnd) ? cwnd : max_cwnd;
 //  cerr << string(window_size(), '.') << "  " << rtt << endl;
 //  cerr << "window: " << cwnd << endl;
