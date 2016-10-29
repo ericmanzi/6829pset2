@@ -13,7 +13,7 @@ float ai = ai_init;
 float md_factor = 2;
 float ad = 1;
 float delta_rtt = 0;
-float ewma_alpha = 0.8;
+float ewma_alpha = 0.9;
 float last_rtt = 50;
 //float max_cwnd = 80;
 
