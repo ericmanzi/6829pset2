@@ -107,7 +107,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       if (delta_rtt < 0) {
         ad = (rtt / critical_rtt) * 0.1;
       } else { // delta_rtt > 0
-        ad = (rtt / critical_rtt) * 0.5;
+        ad = (rtt / critical_rtt) * 0.7;
       }
 //      cerr << "ad: " << ad << endl;
 
@@ -130,9 +130,10 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > critical_rtt) {
         if (num_acks_til_next_md < 1) {
-          cwnd -= ad;
+//          cwnd -= ad;
           num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
         }
+        cwnd -= ad;
         break;
       }
     }
