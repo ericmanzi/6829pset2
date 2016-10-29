@@ -98,8 +98,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if (rtt < floor_threshold_factor * min_rtt ) {
     cwnd += ai;
   } else if (rtt > 3.2 * min_rtt) {
-    cwnd-= cwnd*((rtt - critical_rtt)/rtt)/2.0;
-//    cwnd -= ad;
+    cwnd -= ad;
     ai = ai_init;
   } else {
 
@@ -131,7 +130,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       uint64_t delay_so_far = timestamp_ms() - sent_table[i];
       if (delay_so_far > critical_rtt) {
         if (num_acks_til_next_md < 1) {
-          cwnd /= 1.02;
+          cwnd /= 2;
           num_acks_til_next_md = last_sequence_number_sent - sequence_number_acked;
         }
         break;
